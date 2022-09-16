@@ -1,0 +1,87 @@
+---
+# Source: templates/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-tutorial
+  namespace: fastapi-tutorial
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastapi-tutorial
+  template:
+    metadata:
+      labels:
+        app: fastapi-tutorial
+    spec:
+      containers:
+      - name: fastapi-tutorial
+        image: registry.hub.docker.com/jaredp37/fastapi-tutorial:0.2.0
+        imagePullPolicy: Always
+        
+        env:
+        - name: DATABASE_NAME
+          value: fastapi-tutorial
+        - name: DATABASE_USERNAME
+          value: fastapi
+        - name: DATABASE_HOST
+          value: postgres-postgresql.fastapi-tutorial-postgres
+        volumeMounts:
+        - name: database-password
+          mountPath: /secrets
+          readOnly: true
+        
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /healthz/
+            port: 8080
+        readinessProbe:
+          httpGet:
+            path: /healthz/
+            port: 8080
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 300m
+            memory: 512Mi
+      
+      initContainers:
+      - name: liquibase
+        image: quay.io/trustacks/liquibase
+        env:
+        - name: CHANGELOG_FILE
+          value: db.changelog.yaml
+        - name: DATABASE_USERNAME
+          value: fastapi
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: database-password
+              key: password
+        - name: DATABASE_JDBC_URL
+          value: postgresql://postgres-postgresql.fastapi-tutorial-postgres:5432/fastapi-tutorial
+        volumeMounts:
+        - name: database-changelog
+          mountPath: /projects/global
+          readOnly: true
+      volumes:
+      - name: database-password
+        secret:
+          secretName: database-password
+          items:
+          - key: password
+            path: database-password
+      - name: database-changelog
+        configMap:
+          name: database-changelog
+          items:
+          - key: changelog
+            path: db.changelog.yaml
+      
+      imagePullSecrets: 
+      - name: registry-secret

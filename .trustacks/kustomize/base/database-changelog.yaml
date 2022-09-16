@@ -1,0 +1,105 @@
+apiVersion: v1
+data:
+  changelog: |+
+    databaseChangeLog:
+    - changeSet:
+        id: 1664807855444-1
+        author: liquibase
+        changes:
+        - createTable:
+            columns:
+            - column:
+                autoIncrement: true
+                constraints:
+                  nullable: false
+                  primaryKey: true
+                  primaryKeyName: users_pkey
+                name: id
+                type: INTEGER
+            - column:
+                name: email
+                type: VARCHAR
+            - column:
+                name: hashed_password
+                type: VARCHAR
+            - column:
+                name: is_active
+                type: BOOLEAN
+            tableName: users
+    - changeSet:
+        id: 1664807855444-2
+        author: liquibase
+        changes:
+        - createTable:
+            columns:
+            - column:
+                autoIncrement: true
+                constraints:
+                  nullable: false
+                  primaryKey: true
+                  primaryKeyName: items_pkey
+                name: id
+                type: INTEGER
+            - column:
+                name: title
+                type: VARCHAR
+            - column:
+                name: description
+                type: VARCHAR
+            - column:
+                name: owner_id
+                type: INTEGER
+            tableName: items
+    - changeSet:
+        id: 1664807855444-3
+        author: liquibase
+        changes:
+        - createIndex:
+            columns:
+            - column:
+                name: email
+            indexName: ix_users_email
+            tableName: users
+            unique: true
+    - changeSet:
+        id: 1664807855444-4
+        author: liquibase
+        changes:
+        - createIndex:
+            columns:
+            - column:
+                name: description
+            indexName: ix_items_description
+            tableName: items
+    - changeSet:
+        id: 1664807855444-5
+        author: liquibase
+        changes:
+        - createIndex:
+            columns:
+            - column:
+                name: title
+            indexName: ix_items_title
+            tableName: items
+    - changeSet:
+        id: 1664807855444-6
+        author: liquibase
+        changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: owner_id
+            baseTableName: items
+            constraintName: items_owner_id_fkey
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: users
+            validate: true
+
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: database-changelog
+  namespace: fastapi-tutorial
+

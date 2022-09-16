@@ -1,0 +1,13 @@
+---
+# Source: templates/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: fastapi-tutorial
+  namespace: fastapi-tutorial
+spec:
+  selector:
+    app: fastapi-tutorial
+  ports:
+  - protocol: TCP
+    port: 8080
