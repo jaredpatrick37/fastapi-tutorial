@@ -1,0 +1,7 @@
+generators:
+- ./secret-generator.yaml
+resources:
+- deployment.yaml
+- namespace.yaml
+- service.yaml
+- database-changelog.yaml
